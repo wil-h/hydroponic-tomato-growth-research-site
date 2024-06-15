@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Selection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #058124;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+            padding: 10px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        .section {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            margin: 0 0 10px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .button-group button {
+            width: 50px;
+            height: 50px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .header {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    <script>
+        function submit(buttonNumber) {
+            document.getElementById("text_to_send").value = JSON.stringify(buttonNumber);
+            document.getElementById("form").submit();
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Select a Plant</h1>
+        </div>
+        <div class="section">
+            <h2>Control</h2>
+            <div class="button-group">
+                <button onclick="submit(1)">1</button>
+                <button onclick="submit(2)">2</button>
+                <button onclick="submit(3)">3</button>
+                <button onclick="submit(4)">4</button>
+                <button onclick="submit(5)">5</button>
+                <button onclick="submit(6)">6</button>
+                <button onclick="submit(7)">7</button>
+                <button onclick="submit(8)">8</button>
+            </div>
+        </div>
+        <div class="section">
+            <h2>pH</h2>
+            <div class="button-group">
+                <button onclick="submit(9)">9</button>
+                <button onclick="submit(10)">10</button>
+                <button onclick="submit(11)">11</button>
+                <button onclick="submit(12)">12</button>
+                <button onclick="submit(13)">13</button>
+                <button onclick="submit(14)">14</button>
+                <button onclick="submit(15)">15</button>
+                <button onclick="submit(16)">16</button>
+            </div>
+        </div>
+        <div class="section">
+            <h2>CalMag</h2>
+            <div class="button-group">
+                <button onclick="submit(17)">17</button>
+                <button onclick="submit(18)">18</button>
+                <button onclick="submit(19)">19</button>
+                <button onclick="submit(20)">20</button>
+                <button onclick="submit(21)">21</button>
+                <button onclick="submit(22)">22</button>
+                <button onclick="submit(23)">23</button>
+                <button onclick="submit(24)">24</button>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Light Intensity</h2>
+            <div class="button-group">
+                <button onclick="submit(25)">25</button>
+                <button onclick="submit(26)">26</button>
+                <button onclick="submit(27)">27</button>
+                <button onclick="submit(28)">28</button>
+                <button onclick="submit(29)">29</button>
+                <button onclick="submit(30)">30</button>
+                <button onclick="submit(31)">31</button>
+                <button onclick="submit(32)">32</button>
+            </div>
+        </div>
+        <div id="myDiv" style="visibility: hidden;">
+            <form id="form" action="{{url_for('receiveData')}}" method="post">
+              <input type="text" id="text_to_send" name="text_to_send" value="">
+            </form>
+        </div>
+        <h1></h1>
+        <h1></h1>
+    </div>
+</body>
+</html>

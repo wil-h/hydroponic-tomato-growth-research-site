@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Selection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: top;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #058124;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+            padding: 10px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        .section {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            margin: 0 0 10px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+        }
+
+        .input-group label {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .button-group button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button-group button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <h2>Plant Information</h2>
+            <div class="input-group">
+                <label for="height">Height(No Units)</label>
+                <input type="text" id="height" name="height">
+                <label for="leafSize">Leaf Size(No Units)</label>
+                <input type="text" id="leafSize" name="leafSize">
+                <label for="ec">E.C.</label>
+                <input type="text" id="ec" name="ec">
+                <label for="deficiencies">Deficiencies(N/A If None)</label>
+                <input type="text" id="deficiencies" name="deficiencies" >
+            </div>
+        </div>
+        <div class="button-group">
+            <button onclick="Upload()">Submit</button>
+        </div>
+        <div id="myDiv" style="visibility: hidden;">
+            <form id="form" action="{{url_for('uploadData')}}" method="post">
+              <input type="text" id="text_to_send" name="text_to_send" value="">
+            </form>
+        </div>
+    </div>
+    <script>
+        const plantNum = "{{ message }}";
+        function Upload(){
+            const msg = plantNum+','+document.getElementById("height").value+','+document.getElementById("leafSize").value+','+document.getElementById("ec").value+','+document.getElementById("deficiencies").value;
+            document.getElementById("text_to_send").value = JSON.stringify(msg);
+            document.getElementById("form").submit();
+        }
+    </script>
+</body>
+</html>
