@@ -1,9 +1,12 @@
-from flask import Flask, request, render_template, g, send_file
+from flask import Flask, request, render_template, g, redirect, url_for, send_file
 from PIL import Image, ImageFont, ImageDraw
 from datetime import datetime
 from waitress import serve
+import pandas as pd
+import tabulate
 import sqlite3
 import os   
+from io import StringIO
 import io
 import matplotlib
 matplotlib.use("Agg")
@@ -206,20 +209,49 @@ def Graph(IV, YDV):
                 set = [dataresult[y],timeresult[y]]
                 experimentaldata.append(set)
 
-    line1x = []
+    avgcontroldata = []
+    groups = {}
     for pair in controldata:
+        if pair[1] not in groups:
+            groups[pair[1]] = [pair[0]]
+        else:
+            groups[pair[1]].append(pair[0])
+    for day, vals in groups.items():
+        sum = 0
+        for val in vals:
+            sum+=float(val)
+        avg = sum/len(vals)
+        avgcontroldata.append([avg,day])
+
+    avgexperimentaldata = []
+    groups = {}
+    for pair in experimentaldata:
+        if pair[1] not in groups:
+            groups[pair[1]] = [pair[0]]
+        else:
+            groups[pair[1]].append(pair[0])
+    for day, vals in groups.items():
+        sum = 0
+        for val in vals:
+            sum+=float(val)
+        avg = sum/len(vals)
+        avgexperimentaldata.append([avg,day])
+    
+    
+    line1x = []
+    for pair in avgcontroldata:
         line1x.append(pair[1])
 
     line1y = []
-    for pair in controldata:
+    for pair in avgcontroldata:
         line1y.append(pair[0])
     
     line2x = []
-    for pair in experimentaldata:
+    for pair in avgexperimentaldata:
         line2x.append(pair[1])
     
     line2y = []
-    for pair in experimentaldata:
+    for pair in avgexperimentaldata:
         line2y.append(pair[0])
 
     for x in range(0,len(line1x)):
@@ -297,30 +329,39 @@ def uploadData():
     EC = data[3]
     deficiencies = data[4]
     db = get_db()
-    if plant==9 or plant==10:
-        ph = 5
-    if plant==11 or plant==12:
-        ph = 5.5
-    if plant==13 or plant==14:
-        ph = 7
-    if plant==15 or plant==16:
-        ph = 7.5
-    if plant>=17 and plant<=20:
-        CM = 2
-    if plant>20 and plant<=24:
-        CM = 4
+    curs = db.cursor()
 
     if plant<9:
-        db.execute('INSERT INTO Control (PN, EC, height, leafSize, deficiencies) VALUES (?, ?, ?, ?, ?)', (plant, EC, height, leafSize, deficiencies))
-        db.commit()
+        table = "Control"
     elif plant<17:
-        db.execute('INSERT INTO PH (PN, ph, EC, height, leafSize, deficiencies) VALUES (?, ?, ?, ?, ?, ?)', (plant, ph, EC, height, leafSize, deficiencies))
-        db.commit()
+        table = "pH"
     elif plant<25:
-        db.execute('INSERT INTO CalMag (PN, CM, EC, height, leafSize, deficiencies) VALUES (?, ?, ?, ?, ?, ?)', (plant, CM, EC, height, leafSize, deficiencies))
-        db.commit()
+        table = "CalMag"
     else:
-        db.execute('INSERT INTO LI (PN, EC, height, leafSize, deficiencies) VALUES (?, ?, ?, ?, ?)', (plant, EC, height, leafSize, deficiencies))
+        table = "LI"
+
+    curs.execute(f"SELECT * FROM {table} WHERE PN = ?",(plant,))
+    rows = curs.fetchall()
+    addedToday = False
+    for row in rows:
+        timestamp = row[1].date()
+        if timestamp == datetime.now().date():
+            addedToday = True
+            id = row[0]
+
+    if addedToday:
+        if(height!=""):
+            db.execute(f"UPDATE {table} SET height = ? WHERE id = ?",(height,id,))
+        if(leafSize!=""):
+            db.execute(f"UPDATE {table} SET leafSize = ? WHERE id = ?",(leafSize,id,))
+        if(EC!=""):
+            db.execute(f"UPDATE {table} SET EC = ? WHERE id = ?",(EC,id,))
+        if(deficiencies!=""):
+            db.execute(f"UPDATE {table} SET deficiencies = ? WHERE id = ?",(deficiencies,id,))
+        db.commit()
+
+    else:    
+        db.execute(f'INSERT INTO {table} (PN, EC, height, leafSize, deficiencies) VALUES (?, ?, ?, ?, ?)', (plant, EC, height, leafSize, deficiencies))
         db.commit()
 
     return render_template("logdatasuccess.html")
@@ -330,4 +371,3 @@ if __name__ == '__main__':
     serve(app,host = '0.0.0.0',port = 5000)
     #app.run(host='0.0.0.0')
     #app.run(debug=True,host='0.0.0.0')
-
