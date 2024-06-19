@@ -1,12 +1,9 @@
-from flask import Flask, request, render_template, g, redirect, url_for, send_file
+from flask import Flask, request, render_template, g, send_file
 from PIL import Image, ImageFont, ImageDraw
 from datetime import datetime
 from waitress import serve
-import pandas as pd
-import tabulate
 import sqlite3
 import os   
-from io import StringIO
 import io
 import matplotlib
 matplotlib.use("Agg")
