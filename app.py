@@ -258,10 +258,14 @@ def Graph(IV, YDV):
     for x in range(0,len(line2x)):
         line2x[x] = dateConv(line2x[x])
 
+    if YDV == "EC":
+        unit = "(ppm)"
+    else:
+        unit = "(cm)"
     plt.plot(line1x, line1y, label='Control', color='blue') 
     plt.plot(line2x, line2y, label=IV, color='red')
     plt.xlabel('Days Since Experiment Start')
-    plt.ylabel(YDV)
+    plt.ylabel(YDV+unit)
     plt.title('Change in '+YDV+' Over Time')
     plt.legend()  
 
