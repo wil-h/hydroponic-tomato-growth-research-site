@@ -258,10 +258,14 @@ def Graph(IV, YDV):
     for x in range(0,len(line2x)):
         line2x[x] = dateConv(line2x[x])
 
+    if YDV == "EC":
+        unit = "(ppm)"
+    else:
+        unit = "(cm)"
     plt.plot(line1x, line1y, label='Control', color='blue') 
     plt.plot(line2x, line2y, label=IV, color='red')
     plt.xlabel('Days Since Experiment Start')
-    plt.ylabel(YDV)
+    plt.ylabel(YDV+unit)
     plt.title('Change in '+YDV+' Over Time')
     plt.legend()  
 
@@ -428,7 +432,7 @@ def uploadData():
 #---------------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    #serve(app,host = '0.0.0.0',port = 5000)
+    serve(app,host = '0.0.0.0',port = 5000)
     #app.run(host='0.0.0.0')
-    app.run(debug=True,host='0.0.0.0')
+    #app.run(debug=True,host='0.0.0.0')
 
