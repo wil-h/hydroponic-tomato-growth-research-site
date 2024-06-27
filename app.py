@@ -3,6 +3,7 @@ from PIL import Image, ImageFont, ImageDraw
 from datetime import datetime
 from waitress import serve
 import sqlite3
+import base64
 import os   
 import io
 import matplotlib
@@ -274,8 +275,17 @@ def Graph(IV, YDV):
 #---------------------------------------------------------------------------------------------------------
 
 @app.route('/')
-def homePage():
-    return render_template('homepage.html')
+def aboutPage():
+    return render_template('home/homeabout.html')
+@app.route('/home/data')
+def dataPage():
+    return render_template('home/homedata.html')
+@app.route('/home/photos')
+def photoPage():
+    return render_template('home/homephotos.html')
+@app.route('/home/resources')
+def resourcePage():
+    return render_template('home/homeresources.html')
 
 @app.route('/tableapi/<IV>')
 def sendTable(IV):
@@ -289,12 +299,53 @@ def sendGraph(parameters):
 
     return send_file(buffer, mimetype='image/png', as_attachment=False)
 
+@app.route('/photodates/<plant>', methods=['GET'])
+def photoDates(plant):
+    db=get_db()
+    cursor=db.cursor()
+    cursor.execute('SELECT created FROM IMAGES WHERE PN = ?',(plant,))
+    dates = cursor.fetchall()
+    dates = [row[0] for row in dates]
+
+    dateString=""
+    for date in dates:
+        dateString+=str(dateConv(date))
+        if date!=dates[len(dates)-1]:
+            dateString+=','
+    return dateString
+
+@app.route("/blobdata/<parameters>")
+def BLOBdata(parameters):    
+    parameters=parameters.split(',')
+    plant = parameters[0]
+    day = parameters[1]
+
+    db=get_db()
+    cursor=db.cursor()
+
+    cursor.execute("SELECT * FROM Images WHERE PN = ?", (plant,))
+    result = cursor.fetchall()
+    times = [row[1] for row in result]
+    blobs = [row[3] for row in result]
+
+    for index, time in enumerate(times):
+        if dateConv(time)==int(day):
+            return blobs[index]
+    
 @app.route('/graphapi')
 def placeholder():
     return send_file('images/Loading.png', mimetype='image/png')
 
 @app.route('/tableapi')
 def tableplaceholder():
+    return send_file('images/Loading.png', mimetype='image/png')
+
+@app.route ('/photodates')
+def datesplaceholder():
+    return send_file('images/Loading.png', mimetype='image/png')
+
+@app.route('/blobdata')
+def BLOBPlaceholder():
     return send_file('images/Loading.png', mimetype='image/png')
 
 @app.route('/uploaddata')
@@ -305,11 +356,7 @@ def selectPlant():
 def image():
     return send_file("images/success.JPG", mimetype='image/jpeg')
 
-@app.route('/image')
-def farmImage():
-    return send_file("images/farm.JPEG", mimetype='image/jpeg')
-
-@app.route('/redirect', methods = ['POST'])
+@app.route('/log', methods = ['POST'])
 def receiveData():
     message = request.form['text_to_send']
     return render_template('logdata.html',message=message)
@@ -317,54 +364,71 @@ def receiveData():
 @app.route('/upload', methods = ['POST'])
 def uploadData():
     stringData = request.form['text_to_send']
+    blob_string1 = request.form['blob_to_send']
+    blob_string2 = request.form['blob_to_send2']
+    blob_string3 = request.form['blob_to_send3']
+    db = get_db()
+    curs = db.cursor()    
+
     stringData = stringData.replace('"',"")
     data = stringData.split(',')
+
+    if stringData[1]!="" or stringData[2]!="" or stringData[3]!="" or stringData[4]!="":
+        plant = int(data[0])
+        height = data[1]
+        leafSize = data[2]
+        EC = data[3]
+        deficiencies = data[4]
+
+        if plant<9:
+            table = "Control"
+        elif plant<17:
+            table = "pH"
+        elif plant<25:
+            table = "CalMag"
+        else:
+            table = "LI"
+
+        curs.execute(f"SELECT * FROM {table} WHERE PN = ?",(plant,))
+        rows = curs.fetchall()
+        addedToday = False
+        for row in rows:
+            timestamp = row[1].date()
+            if timestamp == datetime.now().date():
+                addedToday = True
+                id = row[0]
+
+        if addedToday:
+            if(height!=""):
+                db.execute(f"UPDATE {table} SET height = ? WHERE id = ?",(height,id,))
+            if(leafSize!=""):
+                db.execute(f"UPDATE {table} SET leafSize = ? WHERE id = ?",(leafSize,id,))
+            if(EC!=""):
+                db.execute(f"UPDATE {table} SET EC = ? WHERE id = ?",(EC,id,))
+            if(deficiencies!=""):
+                db.execute(f"UPDATE {table} SET deficiencies = ? WHERE id = ?",(deficiencies,id,))
+            db.commit()
+
+        else:    
+            db.execute(f'INSERT INTO {table} (PN, EC, height, leafSize, deficiencies) VALUES (?, ?, ?, ?, ?)', (plant, EC, height, leafSize, deficiencies))
+            db.commit()
     
-    plant = int(data[0])
-    height = data[1]
-    leafSize = data[2]
-    EC = data[3]
-    deficiencies = data[4]
-    db = get_db()
-    curs = db.cursor()
+    if blob_string1!="":
+        blob_string1=blob_string1[:-1]
+        blob_string2=blob_string2[1:]
+        blob_string2=blob_string2[:-1]
+        blob_string3=blob_string3[1:]
+        blob_string = blob_string1+','+blob_string2+','+blob_string3
 
-    if plant<9:
-        table = "Control"
-    elif plant<17:
-        table = "pH"
-    elif plant<25:
-        table = "CalMag"
-    else:
-        table = "LI"
-
-    curs.execute(f"SELECT * FROM {table} WHERE PN = ?",(plant,))
-    rows = curs.fetchall()
-    addedToday = False
-    for row in rows:
-        timestamp = row[1].date()
-        if timestamp == datetime.now().date():
-            addedToday = True
-            id = row[0]
-
-    if addedToday:
-        if(height!=""):
-            db.execute(f"UPDATE {table} SET height = ? WHERE id = ?",(height,id,))
-        if(leafSize!=""):
-            db.execute(f"UPDATE {table} SET leafSize = ? WHERE id = ?",(leafSize,id,))
-        if(EC!=""):
-            db.execute(f"UPDATE {table} SET EC = ? WHERE id = ?",(EC,id,))
-        if(deficiencies!=""):
-            db.execute(f"UPDATE {table} SET deficiencies = ? WHERE id = ?",(deficiencies,id,))
+        db.execute(f"INSERT INTO Images (Image, PN) VALUES (?, ?)",(blob_string, plant,))
         db.commit()
 
-    else:    
-        db.execute(f'INSERT INTO {table} (PN, EC, height, leafSize, deficiencies) VALUES (?, ?, ?, ?, ?)', (plant, EC, height, leafSize, deficiencies))
-        db.commit()
 
     return render_template("logdatasuccess.html")
 #---------------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    serve(app,host = '0.0.0.0',port = 5000)
+    #serve(app,host = '0.0.0.0',port = 5000)
     #app.run(host='0.0.0.0')
-    #app.run(debug=True,host='0.0.0.0')
+    app.run(debug=True,host='0.0.0.0')
+

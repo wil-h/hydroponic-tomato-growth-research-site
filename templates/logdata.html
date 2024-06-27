@@ -78,6 +78,61 @@
         .button-group button:hover {
             background-color: #0056b3;
         }
+
+        body.mobile .photo-container {
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+        }
+
+        body.mobile .photo-container label {
+            background-color: #007bff;
+            font-weight: normal;
+            color: #ffffff;
+            padding: 2px 5px;
+            font-size: 16px;
+        }
+
+        body.mobile .photo-container img {
+            max-height: 20px;
+        }
+
+        body.mobile .photo-container h6 {
+            font-size: 12px;
+            margin: 0 5px;
+            padding-bottom: 0;
+        }
+
+        body.mobile .photo-container input {
+            display: none;
+            border: none;
+        }
+
+        body.mobile .photo-container p {
+            display: none;
+        }
+
+        body.desktop .photo-container input {
+            display: none;
+        }
+
+        body.desktop .photo-container label {
+            display: none;
+        }
+
+        body.desktop .photo-container p {
+            visibility: visible;
+        }
+
+        body.desktop .photo-container img {
+            display: none;
+        }
+
+        body.desktop .photo-container h6 {
+            display: none;
+        }
+
     </style>
 </head>
 <body>
@@ -91,26 +146,144 @@
                 <input type="text" id="leafSize" name="leafSize">
                 <label for="ec">E.C.</label>
                 <input type="text" id="ec" name="ec">
-                <label for="deficiencies">Deficiencies(N/A If None)</label>
-                <input type="text" id="deficiencies" name="deficiencies" >
+                <label for="deficiencies">Deficiencies</label>
+                <input type="text" id="deficiencies" name="deficiencies">
+
+                <div class="photo-container">
+                    <input id="capture" type="file" accept="image/*" capture="camera">
+                    <label for="capture">Upload A Photo:</label>
+                    <h6 id="fileName"></h6>
+                    <img src="" id="img">
+                    <p>use your mobile device to upload a photo</p>
+                </div>
+
             </div>
         </div>
         <div class="button-group">
             <button onclick="Upload()">Submit</button>
         </div>
-        <div id="myDiv" style="visibility: hidden;">
-            <form id="form" action="{{url_for('uploadData')}}" method="post">
+        <canvas style="display: none;" id="canvas"></canvas>
+        <div id="formdiv" style="visibility: hidden;">
+            <form id="form" action="{{url_for('uploadData')}}" method="post" enctype="multipart/form-data">
               <input type="text" id="text_to_send" name="text_to_send" value="">
+              <input type="text" id="blob_to_send" name="blob_to_send" value="">
+              <input type="text" id="blob_to_send2" name="blob_to_send2" value="">
+              <input type="text" id="blob_to_send3" name="blob_to_send3" value="">
             </form>
         </div>
     </div>
     <script>
         const plantNum = "{{ message }}";
+        const canvas = document.getElementById('canvas')
+        const ctx = canvas.getContext('2d');
+
+        if(/Mobi|Android/i.test(navigator.userAgent)){
+            document.body.classList.add("mobile");
+        }
+        else{
+            document.body.classList.add("desktop");
+        }
+
         function Upload(){
             const msg = plantNum+','+document.getElementById("height").value+','+document.getElementById("leafSize").value+','+document.getElementById("ec").value+','+document.getElementById("deficiencies").value;
             document.getElementById("text_to_send").value = JSON.stringify(msg);
+
+            const file = document.getElementById('capture').files[0];
+            if (file) {
+                const customBLOB = [[[]]];
+                var index = 0;
+                var index2 = 0;
+                reduceCanvasResolution(canvas);
+                for (let y = 0; y < canvas.height; y++){
+                    for (let x = 0; x < canvas.width; x++){
+                        const rgb = getPixelColor(x, y);
+                        if (!customBLOB[index2]) {
+                            customBLOB[index2] = [];
+                        }
+                        if (!customBLOB[index2][index]) {
+                            customBLOB[index2][index] = [];
+                        }
+
+                        customBLOB[index2][index].push(rgb[0], rgb[1], rgb[2]);
+
+                        if (x === canvas.width - 1 && y != canvas.height - 1){
+                            index++;
+                            if (y === Math.round(canvas.height/3) || y === Math.round(canvas.height*2/3)){
+                                index2++;
+                                index = 0;
+                            }
+                        }
+                    }
+                }
+                document.getElementById("blob_to_send").value = JSON.stringify(customBLOB[0]);
+                document.getElementById("blob_to_send2").value = JSON.stringify(customBLOB[1]);
+                document.getElementById("blob_to_send3").value = JSON.stringify(customBLOB[2]);
+            }
             document.getElementById("form").submit();
         }
+
+        function getPixelColor(x, y) {
+            const imageData = ctx.getImageData(x, y, 1, 1);
+            const pixel = imageData.data;
+            return [pixel[0],pixel[1],pixel[2]];
+        }
+
+        function reduceCanvasResolution(canvas) {
+            var ctx = canvas.getContext('2d');
+
+            var newWidth = canvas.width / 10;
+            var newHeight = canvas.height / 10;
+
+            var tempCanvas = document.createElement('canvas');
+            var tempCtx = tempCanvas.getContext('2d');
+
+            tempCanvas.width = newWidth;
+            tempCanvas.height = newHeight;
+
+            tempCtx.drawImage(canvas, 0, 0, newWidth, newHeight);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            ctx.drawImage(tempCanvas, 0, 0);
+        }
+
+        document.getElementById('capture').addEventListener('change', function(event) {
+            const fileInput = event.target;
+            const file = fileInput.files[0];
+
+            //img preview
+            if (file) {
+                const fileName = file.name;
+                document.getElementById('fileName').innerText = fileName;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('img');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+            else {
+                document.getElementById('fileName').innerText = 'No file chosen';
+                document.getElementById('img').style.display = 'none';
+                return;
+            }
+
+            //draw to canvas
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
     </script>
 </body>
 </html>

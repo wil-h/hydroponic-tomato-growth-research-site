@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            html, body {
+                overflow-x: hidden;
+            }
+            body {
+                background-color: #058124;
+                margin: 0;
+                padding: 0;
+            }
+            .header-container {
+                background-color: #058124;
+                padding: 0;
+                height: fit-content;
+                align-items: center;
+                justify-content: center;
+                padding: 10px;
+                position: relative;
+            }
+            .header-container img {
+                height: 225px; 
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                bottom: 50%;
+                transform: translateY(-50%);
+                padding-top: 5%;
+                padding-bottom: 5%;
+            }
+            .header-container h1 {
+                color: #f1f0f0;
+                font-size: 70px;
+                margin: 0;
+                text-align: center;
+            }
+            .navbar {
+                width: 100%;
+                background-color: #058124;
+                display: flex;
+                justify-content: center;
+                padding: 10px 0;
+                margin-top: 0;
+            }
+            .navbar button { 
+                background-color: #058124;
+                border: none;
+                color: white;
+                padding: 14px 20px;
+                text-align: center;
+                display: inline-block;
+                font-size: 35px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            .navbar button:hover,
+            .navbar button:focus {
+                background-color: #045e1a;
+            }
+            body.mobile .header img{
+                visibility: hidden;
+            }
+            .biocontainer {
+                float: left;
+                width: 100%;
+                background-color: #f1f0f0;
+                padding-top: 20px;
+            }
+            .image {
+                float: right;
+                width: 50%;
+            }
+            .image img {
+                width: 100%;
+                height: auto;
+            }
+            .bio {
+                float: left;
+                width: 48%;
+                padding-left: 1%;
+            }
+            .bio p {
+                font-size: 30px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header-container">
+            <a href="https://www.charlottecountryday.org/bucsnet"><img src="{{url_for('static', filename = 'ccdslogo.png')}}" alt="CCDS Logo"></a>
+            <h1>CCDS Hydroponics Research</h1>
+            <div class="navbar">
+                <a href="{{url_for('aboutPage')}}"><button>About The Project</button></a>
+                <a href="{{url_for('dataPage')}}"><button>Our Data</button></a>
+                <a href="{{url_for('photoPage')}}"><button>Photos</button></a>
+                <a href="{{url_for('resourcePage')}}"><button>Resources</button></a>
+            </div>
+        </div>
+        <div class="biocontainer">
+            <div class="image">
+                <img src="{{url_for('static', filename = 'farm.JPEG')}}" alt="Farm Image">
+            </div>
+            <div class="bio">
+                <p>
+                    placeholder text, needs to be written
+                </p>
+            </div>
+        </div>
+        <script>
+            if(/Mobi|Android/i.test(navigator.userAgent)){
+                document.body.classList.add("mobile");
+            }
+        </script>
+    </body>
+</html>

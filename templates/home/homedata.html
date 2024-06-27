@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            html, body{
+                overflow-x: hidden;
+            }
+            body{
+                background-color: #058124;
+                margin: 0;
+                padding: 0;
+                
+            }
+            .header-container {
+                background-color: #058124;
+                padding: 0;
+                height: fit-content;
+                align-items: center;
+                justify-content: center;
+                padding: 10px;
+                position: relative;
+            }
+            .header-container img {
+                height: 225px; 
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                bottom: 50%;
+                transform: translateY(-50%);
+                padding-top: 5%;
+                padding-bottom: 5%;
+            }
+            .header-container h1 {
+                color: #f1f0f0;
+                font-size: 70px;
+                margin: 0;
+                text-align: center;
+            }
+            .navbar {
+                width: 100%;
+                background-color: #058124;
+                display: flex;
+                justify-content: center;
+                padding: 10px 0;
+                margin-top: 0;
+            }
+            .navbar button {
+                background-color: #058124;
+                border: none;
+                color: white;
+                padding: 14px 20px;
+                text-align: center;
+                display: inline-block;
+                font-size: 35px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            .navbar button:hover,
+            .navbar button:focus {
+                background-color: #045e1a;
+            }
+            body.mobile .header img{
+                visibility: hidden;
+            }
+            .datacontainer{
+                text-align: center;
+                width: 100%;
+                background-color: #f1f0f0;
+            }
+            .graph h1{
+                text-align: left;
+            }
+            .ivdropdown select {
+                width: 200px;
+                height: 40px;
+                font-size: 16px;
+                border: 2px solid #ccc;
+                border-radius: 4px;
+                padding: 5px;
+                background-color: #f9f9f9;
+            }
+            .ivdropdown select:focus {
+                border-color: #007BFF;
+                outline: none;
+            }
+            .ivdropdown label{
+                font-size: 20px;
+            }
+            .dvdropdown select {
+                width: 200px;
+                height: 40px;
+                font-size: 16px;
+                border: 2px solid #ccc;
+                border-radius: 4px;
+                padding: 5px;
+                background-color: #f9f9f9;
+            }
+            .dvdropdown select:focus {
+                border-color: #007BFF;
+                outline: none;
+            }
+            .dvdropdown label{
+                font-size: 20px; 
+            }
+            .table h1{
+                text-align: left;
+            }
+            .frame {
+                width: 100%;
+                height: 100%;
+            }
+            .ivdropdown2 select {
+                width: 200px;
+                height: 40px;
+                font-size: 16px;
+                border: 2px solid #ccc;
+                border-radius: 4px;
+                padding: 5px;
+                background-color: #f9f9f9;
+            }
+            .ivdropdown2 select:focus {
+                border-color: #007BFF;
+                outline: none;
+            }
+            .ivdropdown2 label{
+                font-size: 20px;
+            }
+            .table iframe{
+                padding-bottom: 10%;
+                border: none;
+            }
+        
+        </style>
+    </head>
+    <body>
+        <div class="header-container">
+            <a href="https://www.charlottecountryday.org/bucsnet"><img src="{{url_for('static', filename = 'ccdslogo.png')}}" alt="CCDS Logo"></a>
+            <h1>CCDS Hydroponics Research</h1>
+            <div class="navbar">
+                <a href="{{url_for('aboutPage')}}"><button>About The Project</button></a>
+                <a href="{{url_for('dataPage')}}"><button>Our Data</button></a>
+                <a href="{{url_for('photoPage')}}"><button>Photos</button></a>
+                <a href="{{url_for('resourcePage')}}"><button>Resources</button></a>
+            </div>
+        </div>
+
+        <div class="datacontainer">
+            <div class="data">
+                <div class="graph">
+                    <h1>Graph:</h1>
+                    <br>
+                    <div class="ivdropdown">
+                        <label for="IV">Select the IV You Want to Graph:</label>
+                        <select name="IV" id="IV" class="iv">
+                            <option value="ph5">pH 5</option>
+                            <option value="ph5.5">pH 5.5</option>
+                            <option value="ph7">pH 7</option>
+                            <option value="ph7.5">pH 7.5</option>
+                            <option value="CM2">CalMag 2mL</option>
+                            <option value="CM4">CalMag 4mL</option>
+                            <option value="LI">Decreased Light Intensity</option>
+                        </select>
+                    </div>
+                    <br>
+                    <div class="dvdropdown">
+                        <label for="DV">Select the DV You Want to Graph:</label>
+                        <select name="DV" id="DV" class="dv">
+                            <option value="height">Plant Height</option>
+                            <option value="leafSize">Leaf Length</option>
+                            <option value="EC">Electrical Conductivity</option>
+                        </select>
+                    </div>
+                    <br>
+                    <div class="frame">
+                        <iframe frameborder="0" id="frame"></iframe>
+                    </div>
+                </div>
+                <div class="table">
+                    <h1>Table:</h1>
+                    <div class="ivdropdown2">
+                        <label for="IV2">Select the Dataset You Want to View:</label>
+                        <select onselect="" name="IV2" id="IV2" class="iv">
+                            <option value="control">Control</option>
+                            <option value="ph5">pH 5</option>
+                            <option value="ph5.5">pH 5.5</option>
+                            <option value="ph7">pH 7</option>
+                            <option value="ph7.5">pH 7.5</option>
+                            <option value="CM2">CalMag 2mL</option>
+                            <option value="CM4">CalMag 4mL</option>
+                            <option value="LI">Decreased Light Intensity</option>
+                        </select>
+                    </div>
+                    <br>
+                    <div class="table">
+                        <iframe id="table"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            if(/Mobi|Android/i.test(navigator.userAgent)){
+                document.body.classList.add("mobile");
+            }
+            const iframe = document.getElementById("frame");
+            const tableframe = document.getElementById("table");
+            const baseUrl = "{{ url_for('placeholder') }}";
+            setTimeout(function (){
+                graphparameters();
+                tableparameters();
+            },500);
+            function graphparameters(){
+                var iv = document.getElementById('IV').value;
+                var dv = document.getElementById('DV').value;
+                var params = '/'+iv+','+dv;
+            
+                iframe.src = baseUrl+params;
+            };
+
+            iframe.onload = function() {
+                iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
+                iframe.style.width = iframe.contentWindow.document.body.scrollWidth + 'px';
+            };
+            tableframe.onload = function() {
+                tableframe.style.height = tableframe.contentWindow.document.body.scrollHeight + 'px';
+                tableframe.style.width = tableframe.contentWindow.document.body.scrollWidth-20 + 'px';
+
+            };
+
+            const frame = document.getElementById("table");
+            const baseUrl2 = "{{ url_for('tableplaceholder') }}";
+            function tableparameters(){
+                var iv2 = document.getElementById('IV2').value;
+                var params = '/'+iv2
+                frame.src = baseUrl2+params;
+            }
+            document.getElementById("IV").addEventListener('change', (event) => {
+                graphparameters();
+            });
+            document.getElementById("DV").addEventListener('change', (event) => {
+                graphparameters();
+            });
+            document.getElementById("IV2").addEventListener('change', (event) => {
+                tableparameters();
+            });
+            document.addEventListener("DOMContentLoaded", function() {
+                function isMobileDevice() {
+                    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+                }
+
+                if (isMobileDevice()) {
+                    document.body.classList.add('mobile');
+                    document.querySelector('.container').classList.add('mobile');
+                } else {
+                    document.body.classList.add('desktop');
+                }
+            });
+        </script>
+    </body>
+</html>

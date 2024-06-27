@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            html, body {
+                overflow-x: hidden;
+            }
+            body {
+                background-color: #058124;
+                margin: 0;
+                padding: 0;
+            }
+            .header-container {
+                background-color: #058124;
+                padding: 0;
+                height: fit-content;
+                align-items: center;
+                justify-content: center;
+                padding: 10px;
+                position: relative;
+            }
+            .header-container img {
+                height: 225px; 
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                bottom: 50%;
+                transform: translateY(-50%);
+                padding-top: 5%;
+                padding-bottom: 5%;
+            }
+            .header-container h1 {
+                color: #f1f0f0;
+                font-size: 70px;
+                margin: 0;
+                text-align: center;
+            }
+            .navbar {
+                width: 100%;
+                background-color: #058124;
+                display: flex;
+                justify-content: center;
+                padding: 10px 0;
+                margin-top: 0;
+            }
+            .navbar button {
+                background-color: #058124;
+                border: none;
+                color: white;
+                padding: 14px 20px;
+                text-align: center;
+                display: inline-block;
+                font-size: 35px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            .navbar button:hover,
+            .navbar button:focus {
+                background-color: #045e1a;
+            }
+            body.mobile .header-container img{
+                visibility: hidden;
+            }
+            .main{
+                background-color: #f1f0f0;
+                min-height: 100vh;
+                text-align: center;
+            }
+            .main label{
+                font-size: 20px;
+            }
+            .main select {
+                width: 200px;
+                height: 40px;
+                font-size: 16px;
+                border: 2px solid #ccc;
+                border-radius: 4px;
+                padding: 5px;
+                background-color: #f9f9f9;
+                margin:0.25%;
+            }
+            .main select:focus {
+                border-color: #007BFF;
+                outline: none;
+            }
+            .main button{
+                margin: 0.5%;
+                padding: 10px;
+                font-size: 16px;
+                border: none;
+                border-radius: 8px;
+                background-color: #007bff;
+                color: #ffffff;
+            }
+            .main button:focus{
+                background-color: #007bffc9;
+            }
+            .canvas canvas{
+                margin:1%;
+                width: 50%;
+                height: auto;
+            }
+            body.mobile .canvas canvas{
+                width: 75%;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header-container">
+            <a href="https://www.charlottecountryday.org/bucsnet"><img src="{{url_for('static', filename = 'ccdslogo.png')}}" alt="CCDS Logo"></a>
+            <h1>CCDS Hydroponics Research</h1>
+            <div class="navbar">
+                <a href="{{url_for('aboutPage')}}"><button>About The Project</button></a>
+                <a href="{{url_for('dataPage')}}"><button>Our Data</button></a>
+                <a href="{{url_for('photoPage')}}"><button>Photos</button></a>
+                <a href="{{url_for('resourcePage')}}"><button>Resources</button></a>
+            </div>
+        </div>
+        <div class="main">
+            <label for="plant">Select the Plant you Want to View:</label>
+            <select name="plant" id="plant">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+                <option value="21">21</option>
+                <option value="22">22</option>
+                <option value="23">23</option>
+                <option value="24">24</option>
+                <option value="25">25</option>
+                <option value="26">26</option>
+                <option value="27">27</option>
+                <option value="28">28</option>
+                <option value="29">29</option>
+                <option value="30">30</option>
+                <option value="31">31</option>
+                <option value="32">32</option>
+            </select>
+            <br>
+            <label for="day">Select the Day When the Photo Was Taken:</label>
+            <select name="day" id="day"></select>
+            <br>
+            <button onclick="drawImage()">Search</button>
+            <div class="canvas">
+                <canvas id="image"></canvas>
+            </div>
+        </div>
+        <script>
+            if(/Mobi|Android/i.test(navigator.userAgent)){
+                document.body.classList.add("mobile");
+            }
+            document.getElementById("plant").addEventListener('change', (event) => {updateDays()});
+            document.getElementById("day").addEventListener('change', (event) => {drawImage()});
+            document.addEventListener('DOMContentLoaded', (event) => {updateDays()});
+            async function updateDays(){
+                let response = await fetch('{{url_for("datesplaceholder")}}/'+document.getElementById("plant").value);
+                let days = await response.text();
+                days = days.split(',');
+                document.getElementById("day").innerHTML = '';
+                if(days[0]!=""){
+                    days.forEach((day) => {
+                        var dayOption = document.createElement('option');
+                        dayOption.value = day;
+                        dayOption.innerText = day;
+
+                        document.getElementById("day").appendChild(dayOption);
+                    });
+                }
+                else{
+                    var dayOption = document.createElement('option');
+                    dayOption.value = null;
+                    dayOption.innerText = "None Available For This Plant";
+                    document.getElementById("day").appendChild(dayOption);
+                }
+            }
+            async function drawImage(){
+                let response = await fetch('{{url_for("BLOBPlaceholder")}}/'+document.getElementById('plant').value+','+document.getElementById('day').value);
+                let customBLOB = await response.text();
+                customBLOB = JSON.parse(customBLOB);
+
+                const canvas = document.getElementById("image");
+                const ctx = canvas.getContext('2d');
+ 
+                canvas.width = customBLOB[0].length/3;
+                canvas.height = customBLOB.length;
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                for(let y = 0; y<customBLOB.length; y++){
+                    for(let x = 0; x<customBLOB[0].length; x+=3){
+                        setPixelColor(x/3,y,customBLOB[y][x],customBLOB[y][x+1],customBLOB[y][x+2]);
+                    }
+                }
+            }
+            function setPixelColor(x, y, r, g, b) {
+                const canvas = document.getElementById("image");
+                const ctx = canvas.getContext('2d');
+
+                const imageData = ctx.createImageData(1, 1);
+                const pixel = imageData.data;
+                pixel[0] = r;
+                pixel[1] = g;
+                pixel[2] = b;
+                pixel[3] = 255;
+                ctx.putImageData(imageData, x, y);
+            }
+        </script>
+    </body>
+</html>
