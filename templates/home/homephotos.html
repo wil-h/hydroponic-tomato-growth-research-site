@@ -157,16 +157,13 @@
             <select name="day" id="day"></select>
             <br>
             <button onclick="drawImage()">Search</button>
-            <div class="canvas">
-                <canvas id="image"></canvas>
-            </div>
+            <div class="canvas"id="canvas"></div>
         </div>
         <script>
             if(/Mobi|Android/i.test(navigator.userAgent)){
                 document.body.classList.add("mobile");
             }
             document.getElementById("plant").addEventListener('change', (event) => {updateDays()});
-            document.getElementById("day").addEventListener('change', (event) => {drawImage()});
             document.addEventListener('DOMContentLoaded', (event) => {updateDays()});
             async function updateDays(){
                 let response = await fetch('{{url_for("datesplaceholder")}}/'+document.getElementById("plant").value);
@@ -191,24 +188,27 @@
             }
             async function drawImage(){
                 let response = await fetch('{{url_for("BLOBPlaceholder")}}/'+document.getElementById('plant').value+','+document.getElementById('day').value);
-                let customBLOB = await response.text();
-                customBLOB = JSON.parse(customBLOB);
-
-                const canvas = document.getElementById("image");
-                const ctx = canvas.getContext('2d');
- 
-                canvas.width = customBLOB[0].length/3;
-                canvas.height = customBLOB.length;
-                ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                for(let y = 0; y<customBLOB.length; y++){
-                    for(let x = 0; x<customBLOB[0].length; x+=3){
-                        setPixelColor(x/3,y,customBLOB[y][x],customBLOB[y][x+1],customBLOB[y][x+2]);
+                let BLOBList = await response.text();
+                BLOBList = JSON.parse(BLOBList);
+                document.querySelectorAll('canvas').forEach(canvas => canvas.remove());
+                for(let i=0; i<BLOBList.length;i++){
+                    var canvas = document.createElement('canvas');
+                    document.getElementById("canvas").appendChild(canvas);
+                    var customBLOB = JSON.parse(BLOBList[i]);
+                    const ctx = canvas.getContext('2d');
+    
+                    canvas.width = customBLOB[0].length/3;
+                    canvas.height = customBLOB.length;
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    for(let y = 0; y<customBLOB.length; y++){
+                        for(let x = 0; x<customBLOB[0].length; x+=3){
+                            setPixelColor(x/3,y,customBLOB[y][x],customBLOB[y][x+1],customBLOB[y][x+2],canvas);
+                        }
                     }
                 }
             }
-            function setPixelColor(x, y, r, g, b) {
-                const canvas = document.getElementById("image");
+            function setPixelColor(x, y, r, g, b, canvas) {
                 const ctx = canvas.getContext('2d');
 
                 const imageData = ctx.createImageData(1, 1);

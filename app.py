@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, g, send_file
 from PIL import Image, ImageFont, ImageDraw
-from datetime import datetime
+from datetime import datetime,time
 from waitress import serve
 import sqlite3
 import base64
@@ -210,10 +210,10 @@ def Graph(IV, YDV):
     avgcontroldata = []
     groups = {}
     for pair in controldata:
-        if pair[1] not in groups:
-            groups[pair[1]] = [pair[0]]
+        if datetime.combine(pair[1].date(),time(12,0)) not in groups:
+            groups[datetime.combine(pair[1].date(),time(12,0))] = [pair[0]]
         else:
-            groups[pair[1]].append(pair[0])
+            groups[datetime.combine(pair[1].date(),time(12,0))].append(pair[0])
     for day, vals in groups.items():
         sum = 0
         for val in vals:
@@ -224,10 +224,10 @@ def Graph(IV, YDV):
     avgexperimentaldata = []
     groups = {}
     for pair in experimentaldata:
-        if pair[1] not in groups:
-            groups[pair[1]] = [pair[0]]
+        if datetime.combine(pair[1].date(),time(12,0)) not in groups:
+            groups[datetime.combine(pair[1].date(),time(12,0))] = [pair[0]]
         else:
-            groups[pair[1]].append(pair[0])
+            groups[datetime.combine(pair[1].date(),time(12,0))].append(pair[0])
     for day, vals in groups.items():
         sum = 0
         for val in vals:
@@ -235,7 +235,9 @@ def Graph(IV, YDV):
         avg = sum/len(vals)
         avgexperimentaldata.append([avg,day])
     
-    
+    avgexperimentaldata = sorted(avgexperimentaldata, key=lambda x: x[1])
+    avgcontroldata = sorted(avgcontroldata,key=lambda x: x[1])
+
     line1x = []
     for pair in avgcontroldata:
         line1x.append(pair[1])
@@ -312,10 +314,13 @@ def photoDates(plant):
     dates = [row[0] for row in dates]
 
     dateString=""
-    for date in dates:
-        dateString+=str(dateConv(date))
-        if date!=dates[len(dates)-1]:
+    datesAdded=[]
+    for index, date in enumerate(dates):
+        if date.date() not in datesAdded:
+            dateString+=str(dateConv(date))
+            datesAdded.append(date.date())
             dateString+=','
+    dateString=dateString[:-1]
     return dateString
 
 @app.route("/blobdata/<parameters>")
@@ -332,9 +337,11 @@ def BLOBdata(parameters):
     times = [row[1] for row in result]
     blobs = [row[3] for row in result]
 
+    correctBlobs=[]
     for index, time in enumerate(times):
         if dateConv(time)==int(day):
-            return blobs[index]
+            correctBlobs.append(blobs[index])
+    return correctBlobs
     
 @app.route('/graphapi')
 def placeholder():
